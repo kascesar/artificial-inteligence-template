@@ -1,0 +1,86 @@
+# macOS system files
+.DS_Store
+
+# Windows system files
+Thumbs.db
+
+# Large media files
+*.mp4
+*.tiff
+*.avi
+*.flv
+*.mov
+*.wmv
+
+# Applications
+*.app
+*.exe
+*.war
+
+# Compiled Java class files
+*.class
+
+# Compiled Python bytecode
+*.pyc
+*.pyo
+*.pyd
+
+# Log files
+*.log
+
+# Package files
+*.jar
+
+# JetBrains IDE
+.idea/
+
+# Unit test reports
+TEST*.xml
+
+# emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# Ignore all log files at any level
+**/*.log
+
+# Ignore Python cache files at any level
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+**/*.pyd
+
+# Ignore virtual environment folders at any level
+**/venv/
+**/env/
+**/.venv
+
+# Ignore Jupyter Notebook checkpoints at any level
+**/.ipynb_checkpoints/
+
+# Ignore mypy cache at any level
+**/.mypy_cache/
+
+# Ignore Pylint output at any level
+**/pylint_output/
+
+# Ignore coverage reports at any level
+**/htmlcov/
+**/.coverage
+**/.coverage.*
+
+# Ignore pytest cache at any level
+**/.pytest_cache/
+**/*/.virtual_documents/
+
+# Ignore specific editor directories and files at any level
+**/.vscode/
+**/.idea/
+**/*.swp
+**/*.swo

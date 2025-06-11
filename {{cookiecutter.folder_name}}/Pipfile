@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+polars = "*"
+pandas = "*"
+matplotlib = "*"
+seaborn = "*"
+numpy = "*"
+pyarrow = "*"
+duckdb = "*"
+scikit-learn = "*"
+tensorflow = "*"
+mlflow = "*"
+pdoc = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "{{cookiecutter.python_version}}"
