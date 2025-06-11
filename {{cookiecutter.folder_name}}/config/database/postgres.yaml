@@ -1,0 +1,7 @@
+_target_: src.database.conecctions.Postgres
+host: ${oc.env:POSTGRES_HOST}
+user: ${oc.env:POSTGRES_USER}
+password: ${oc.env:POSTGRES_PASSWORD}
+port: ${oc.env:POSTGRES_PORT}
+dbname: ${oc.env:POSTGRES_DBNAME}
+uri: postgresql://${.user}:${.password}@${.host}:${.port}/${.dbname}
