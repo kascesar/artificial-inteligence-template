@@ -144,7 +144,7 @@ gitGraph TB:
 
 ---
 
-## Desarrollo de  *Models*
+## Desarrollo de Models
 
 En el sub-modulo models deben ir todos los desarrollos de los modelos
 de *inteligencia artificial*, cada modelo debe contenerse en su propia
@@ -169,7 +169,7 @@ graph LR
   end
 ```
 
-## Desarrollo de *Datasets*
+## Desarrollo de Datasets
 
 El codigo que genera los datasets tambien deben ser puestos en su
 propio modulo, siguiendo el siguiente esquema:
@@ -197,7 +197,7 @@ Tenga en cuenta que *common.py* y *dataset.py* son estrictos y aunque
 - *dataset.py* es el lugar donde debe declararse las funciones/clases
   que creen el dataset.
 
-## Desarrollo de *Entrenamientos*
+## Desarrollo de Entrenamientos
 
 El entrenamiento de los diversos modelos deben estructurase en la
 carpeta *train* destinada a este proceso, esto se debe a que cada
@@ -240,7 +240,7 @@ def train(config:DictConfig):
 El argumento siempre debe ser un config del tipo DictConfig que
 provendrá siempre de *Hydra*
 
-## Desarrollo de *Deployments*
+## Desarrollo de Deployments
 
 Este modulo, no está pensado para ser ejecutado mediante *pipelines*,
 debido a que carece de necesidad, no es una tarea altamente demandante
@@ -276,7 +276,7 @@ de manera automatica sin tener que recordar la cadena de comandos:
 
 REGION="us-east-1"
 AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-ECR_NAME="anomaly/bhp/detector-lstm-v1-modern"
+ECR_NAME="<ECR-NAME>"
 ECR_TAG="latest"
 BACKEND="podman"
 
@@ -350,26 +350,22 @@ import os
 import bentoml
 import pandas as pd
 
-from common import XBuilderAnomaly, anomaly_mesure
+from common import fun1, fun2
 
 _current_dir = os.path.dirname(os.path.abspath(__file__))
-_sample_input_path = os.path.join(_current_dir, "sample_input.csv")
+_sample_input_path = os.path.join(_current_dir, "example_input.csv")
 
-_model_uri = "runs:/4444516e8cc94b40b11d9e97217ce6ae/model"  # bhp
+_model_uri = "runs:/asdfg12345/model"
 
 bentoml.mlflow.import_model(
-    "detector-lstm-v1-bhp",
+    "detector-example",
     model_uri=_model_uri,
     signatures={"predict": {"batchable": False, "batch_dim": 0}},
     custom_objects={
-        "x_builder": XBuilderAnomaly(),
-        "anomaly_mesure": anomaly_mesure,
+        "fun1": fun1(),
+        "fun2": fun2(),
         "sample_input": pd.read_csv(
             _sample_input_path,
-            parse_dates=[
-                "shift_start_timestamp_utc",
-                "fatigue_log_timestamp_utc",
-            ],
         ),
     },
 )
@@ -384,7 +380,7 @@ necesario para que bentoml pueda crear la *API* del modelo de manera
 automatica
 
 ```python
-"""Servicio API FRD-Model V1."""
+"""Servicio API Example"""
 
 import json
 from typing import Annotated, Any, Dict, List
@@ -408,21 +404,15 @@ image = (
     .run(' * echo "Python packages installed"')
 )
 
-bhpv1_custom_objects = bentoml.mlflow.get(
-    "detector-lstm-v1-bhp:latest"
+custom_objects = bentoml.mlflow.get(
+    "example:latest"
 ).custom_objects
-sample_input = bhpv1_custom_objects["sample_input"]
-sample_input["fatigue_log_timestamp_utc"] = sample_input[
-    "fatigue_log_timestamp_utc"
-].astype(str)
-sample_input["shift_start_timestamp_utc"] = sample_input[
-    "shift_start_timestamp_utc"
-].astype(str)
+sample_input = custom_objects["sample_input"]
 example = json.dumps(sample_input.to_dict(orient="records"))
 
 
-class InputFrdDataModel(bentoml.IODescriptor):
-    """Modelo de datos para la api de FRD-Models.
+class InputDataModel(bentoml.IODescriptor):
+    """Modelo de datos para la api de Models.
 
     Args:
       data:
@@ -433,32 +423,31 @@ class InputFrdDataModel(bentoml.IODescriptor):
         bentoml.validators.DataframeSchema(
             orient="records",
             columns=[
-                "shift_start_timestamp_utc",
-                "fatigue_log_timestamp_utc",
-                "fatigue_status_level",
+                "col1",
+                "col2",
+                "col3",
             ],
         ),
     ] = example
 
 
-class OutputFrdDatamModel(BaseModel):
-    """Modelo de datos para la api de FRD-Models."""
+class OutputDatamModel(BaseModel):
+    """Modelo de datos para la api de Models."""
 
     prediction: Dict[str, List[str]]
 
 
 @bentoml.service(image=image)
-class FRDv1:
-    """FRD API service."""
+class EXAMPLEv1:
+    """EXAMPLEv1 API service."""
 
-    bhpV1 = BentoModel("detector-lstm-v1-bhp:latest")
+    model = BentoModel("detector-example:latest")
 
     def __init__(self):
         """
-        FRD API Serive.
+        EXAMPLE API Serive.
 
-        This is the api of FRD service, this API allow you to predict
-        Fatigue Risk about operators on the FRD API.
+        This is the api of EXAMPLE service, this API allow you to predict.
 
         Args:
           None
@@ -466,42 +455,34 @@ class FRDv1:
         Return:
           None
         """
-        self.bhpV1 = bentoml.mlflow.load_model(self.bhpV1)
-        self.x_builder = bhpv1_custom_objects["x_builder"]
-        self.mesure = bhpv1_custom_objects["anomaly_mesure"]
+        self.modelV1 = bentoml.mlflow.load_model(self.model)
+        self.x_builder = custom_objects["fun1"]
+        self.mesure = custom_objects["fun2"]
 
     @bentoml.api(
-        input_spec=InputFrdDataModel,
-        # output_spec=OutputFrdDatamModel,
+        input_spec=InputDataModel,
+        # output_spec=OutputDatamModel,
         route="/predict",
     )
-    def predictV1(self, **params: Any) -> Dict[str, List[str]]:
+    def predict(self, **params: Any) -> Dict[str, List[str]]:
         """
-        PredictV1.
-
-        This metoth predict the Risk of operator gien the $X$.
+        Predict.
 
         Args:
           data: DataFrame
 
         Returns:
-          A Prediction Tuple[Risk, Timestamps].
+          A Prediction Tuple[pred, Timestamps].
         """
         data = params["data"]
         data = data.convert_dtypes(dtype_backend="pyarrow")
-        data["shift_start_timestamp_utc"] = pd.to_datetime(
-            data["shift_start_timestamp_utc"]
-        )
-        data["fatigue_log_timestamp_utc"] = pd.to_datetime(
-            data["fatigue_log_timestamp_utc"]
-        )
-        X, dts = self.x_builder(data)
-        y = self.bhpV1.predict(X)
+        X, dts = self.fun1(data)
+        y = self.model.predict(X)
         prediction = {
-            "anomaly-score": [f"{i}" for i in self.mesure(X, y)],
+            "prediction": [f"{i}" for i in self.fun2(X, y)],
             "timestamp": dts,
         }
-        # return OutputFrdDatamModel(prediction=prediction)
+        # return OutputDatamModel(prediction=prediction)
         return prediction
 ```
 
