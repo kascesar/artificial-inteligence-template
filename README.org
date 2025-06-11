@@ -6,10 +6,9 @@
 #+macro: latest-export-date (eval (format-time-string "%F %T %z"))
 #+macro: word-count (eval (count-words (point-min) (point-max)))
 
------
 - *La ultima revisión de este documento fue* {{{latest-export-date}}}
 - *La cantidad de palabras del documento es* {{{word-count}}}.
------
+
 
 * Artificial Inteligence Template
 
