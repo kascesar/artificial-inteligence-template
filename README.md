@@ -1,10 +1,5 @@
-
----
-
--   **La ultima revisión de este documento fue** 2025-06-11 13:40:51 -0400
+-   **La ultima revisión de este documento fue** 2025-06-11 13:42:57 -0400
 -   **La cantidad de palabras del documento es** 151.
-
----
 
 
 # Artificial Inteligence Template
