@@ -15,6 +15,7 @@ scikit-learn = "*"
 tensorflow = "*"
 mlflow = "*"
 pdoc = "*"
+hydra-core = "*"
 
 [dev-packages]
 
