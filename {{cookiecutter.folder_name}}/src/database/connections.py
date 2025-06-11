@@ -8,7 +8,7 @@ Las conecciones soportadas de momento son:
 
 
 - [x] DuckDB
-- [ ] Postgres
+- [x] Postgres
 - [ ] Mysql
 
 > [!NOTE] Manejar estas conecciones mediante Hydra para garantiza la
@@ -17,6 +17,13 @@ Las conecciones soportadas de momento son:
 """
 
 __docformat__ = "google"
+
+from contextlib import contextmanager
+
+import pandas as pd
+import duckdb
+from psycopg2.pool import SimpleConnectionPool
+from psycopg2.extensions import connection
 
 
 class DuckDB:
@@ -41,8 +48,6 @@ class DuckDB:
                 de datos.
         """
 
-        import duckdb
-
         self.conn = duckdb.connect(path)
 
     def __call__(self, consulta):
@@ -54,3 +59,56 @@ class DuckDB:
             instancia de pandas.DataFrame con la salida
         """
         return self.conn(consulta).df()
+
+
+class Postgres:
+    def __init__(
+        self,
+        host,
+        user,
+        password,
+        port,
+        dbname,
+        maxconn=1,
+        minconn=1,
+        **kwargs,
+    ):
+        self.host = host
+        self.port = port
+        self.password = password
+        self.user = user
+        self.database = dbname
+        self.maxconn = maxconn
+        self.minconn = minconn
+        self.pool = self._create_pool()
+
+    def _create_pool(self) -> SimpleConnectionPool:
+        return SimpleConnectionPool(
+            minconn=self.minconn,
+            maxconn=self.maxconn,
+            host=self.host,
+            database=self.database,
+            user=self.user,
+            password=self.password,
+            port=self.port,
+        )
+
+    @contextmanager
+    def _get_connection(self) -> connection:
+        conn = self.pool.getconn()
+        try:
+            yield conn
+        finally:
+            self.pool.putconn(conn)
+
+    def __call__(self, query: str) -> pd.DataFrame:
+        """Ejecuta una consulta y devuelve un DataFrame de Polars."""
+        try:
+            with self._get_connection() as conn:
+                return pd.read_sql(
+                    query,
+                    conn,
+                )
+        except Exception as e:
+            print(f"Error ejecutando query: {e}")
+            raise
