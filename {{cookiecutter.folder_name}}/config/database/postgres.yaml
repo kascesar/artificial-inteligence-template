@@ -1,4 +1,4 @@
-_target_: src.database.conecctions.Postgres
+_target_: src.database.conections.Postgres
 host: ${oc.env:POSTGRES_HOST}
 user: ${oc.env:POSTGRES_USER}
 password: ${oc.env:POSTGRES_PASSWORD}
